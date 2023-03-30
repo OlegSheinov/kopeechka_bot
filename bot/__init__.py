@@ -8,6 +8,7 @@ import uvloop
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
+from dotenv import load_dotenv
 
 
 def setup_logger(logfile, level):
@@ -66,6 +67,7 @@ loop = asyncio.get_event_loop()
 
 
 def create_bot():
+    load_dotenv()
     api_token = os.getenv('API_TOKEN')
     return Bot(token=api_token, parse_mode=ParseMode.HTML)
 
