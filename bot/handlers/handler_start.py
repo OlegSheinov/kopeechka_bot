@@ -20,9 +20,9 @@ async def get_welcome_message_and_send_message(message: Message, state: FSMConte
 async def get_email_and_send_code(message: Message, state: FSMContext):
     if await is_valid_email(message.text):
         async with ClientSession() as session:
-            async with session.get("http://0.0.0.0:8000/get_email_id", json={'email': message.text}) as response:
+            async with session.post("http://0.0.0.0:8000/get_email_id", json={'email': message.text}) as response:
                 email_id = await response.json()
-            async with session.get("http://0.0.0.0:8000/get_code_from_id",
+            async with session.post("http://0.0.0.0:8000/get_code_from_id",
                                    json={'email_id': email_id}) as response:
                 value_response = await response.json()
                 if value_response == "WAIT_LINK":
@@ -30,13 +30,6 @@ async def get_email_and_send_code(message: Message, state: FSMContext):
                 elif value_response == "ACTIVATION_CANCELED":
                     text = "Ваша почта была отменена. Активируйте"
                 else:
-                    if value_response.isdigit():
-                        text = f"Ваш код, полученный с сайта: <code>{int(value_response)}</code>"
-                    else:
-                        soup = BeautifulSoup(value_response, "lxml")
-                        all_md_text = soup.find_all('span', class_="mb_text")
-                        match = [re.search(r"( \d{5})", text.text) for text in all_md_text]
-                        code = list(filter(lambda x: x is not None, match))
-                        text = f"Ваш код, полученный с сайта: <code>{int(code[0].group(1))}</code>"
+                    text = f"Ваш код, полученный с сайта: <code>{int(value_response)}</code>"
         await message.answer(text)
 
